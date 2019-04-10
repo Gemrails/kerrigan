@@ -1,0 +1,27 @@
+seednodes:
+- 150.109.11.142:38888
+shut_proxy: false
+control_port: 38888
+listen_port: 12345
+mission_num: 0
+data_port: 38889
+link_limies: 0
+band_width: 0
+log: ""
+mode: debug
+crypt: ""
+server_model: false
+genesis: false
+quiet: false
+log_model: 1
+cache_lines: 500
+log_path: /tmp/kerri.log
+db_model: ""
+proxyconfig:
+  net_proxy_port: 0
+  addr: ""
+  version: ""
+  procotol: ""
+apiconfig:
+  mode: debug
+  port: 48899

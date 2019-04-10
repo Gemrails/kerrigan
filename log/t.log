@@ -1,0 +1,2 @@
+{"file":"/Users/eee/go/src/pnt/log/handler_test.go:56","func":"pnt/log.TestLog","key":"111","level":"info","msg":"hahah","time":"2018-11-23T10:58:18+08:00"}
+{"file":"/Users/eee/go/src/pnt/log/handler_test.go:57","func":"pnt/log.TestLog","level":"info","msg":"666","time":"2018-11-23T10:58:18+08:00"}
