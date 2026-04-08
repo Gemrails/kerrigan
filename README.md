@@ -9,7 +9,7 @@ English | [中文](./README_zh.md)
 
 A decentralized resource trading platform built on P2P network and blockchain technology. It enables sharing of compute resources (GPU/Storage/Bandwidth) with transparent pricing via smart contracts and e-CNY payments.
 
-## Architecture
+## Communication Structure
 
 ![Communication Structure](media/kerrigan通信结构.png)
 
@@ -22,19 +22,70 @@ A decentralized resource trading platform built on P2P network and blockchain te
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Application Layer                         │
-│    GPU Plugin  │  Storage Plugin  │  Proxy Plugin         │
+│    GPU Plugin  │  Storage Plugin  │  Proxy Plugin      │
 ├─────────────────────────────────────────────────────────────┤
-│                    Plugin Runtime                           │
-│    Lifecycle  │  Resource Abstraction  │  Metering          │
+│                    Plugin Runtime                            │
+│    Lifecycle  │  Resource Abstraction  │  Metering         │
 ├─────────────────────────────────────────────────────────────┤
-│                    P2P Network Layer                       │
-│    Control Plane  │  Data Plane                              │
+│                    P2P Network Layer                        │
+│    Control Plane  │  Data Plane                             │
 ├─────────────────────────────────────────────────────────────┤
-│                    Blockchain Layer                          │
-│    Resource Registry  │  Trading  │  Plugin Registry        │
+│                    Blockchain Layer                         │
+│    Resource Registry  │  Trading  │  Plugin Registry         │
 │                    e-CNY Payment                            │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## Key Concepts
+
+### Core Values
+- **Decentralized**: No single control point, resources distributed globally
+- **Negotiable**: Resource prices dynamically adjusted by market supply/demand
+- **Trustworthy**: Smart contracts ensure transparent transactions
+- **Extensible**: Plugin-based architecture supporting arbitrary resource types
+
+### Node Roles
+| Role | Description |
+|------|-------------|
+| **Provider** | Contributes idle compute resources |
+| **Consumer** | Uses resources from the network |
+| **Relay** | Forwards traffic for NAT traversal |
+| **Validator** | Verifies transactions on-chain |
+
+### P2P Network
+- **Control Plane**: Node discovery, protocol negotiation, heartbeat (port 38888)
+- **Data Plane**: Tunnel transmission, load balancing, traffic encryption (port 38889)
+- **NAT Traversal**: Direct connection, hole punching, relay fallback
+
+## Plugins
+
+### 🎮 GPU Plugin
+Distributed GPU computing for AI workloads:
+- LLM inference (text generation)
+- Image generation (Stable Diffusion)
+- Embedding vectors
+- Model fine-tuning (LoRA)
+- Batch inference
+
+**Pricing**: Based on GPU model (RTX 4090/A100/H100), VRAM tier, and duration
+
+### 📦 Storage Plugin
+IPFS-based distributed storage:
+- File upload with CID retrieval
+- Pinning for persistence
+- P2P file distribution
+- Multi-replica redundancy
+
+**Pricing**: Based on GB/month storage and replication factor
+
+### 🌐 Proxy Plugin
+Network bandwidth sharing:
+- HTTP/HTTPS transparent proxy
+- SOCKS5 universal proxy
+- TUN/TAP global proxy
+- Geo-pricing (CN/US/JP/SG/EU/HK)
+
+**Pricing**: Based on region, bandwidth tier, and traffic volume
 
 ## Features
 
@@ -84,17 +135,6 @@ make build
 ./build/kerrigan-cli resource list
 ```
 
-## Plugins
-
-### GPU Plugin
-Distributed GPU computing for AI inference, model fine-tuning, and batch processing.
-
-### Storage Plugin
-IPFS-based distributed storage with P2P file retrieval.
-
-### Proxy Plugin
-Network bandwidth sharing with geo-pricing.
-
 ## Project Structure
 
 ```
@@ -102,7 +142,11 @@ kerrigan/
 ├── cmd/               # Entry points (node, cli)
 ├── internal/          # Internal packages
 │   ├── core/         # Core modules (network, plugin, resource)
+│   │   ├── network/  # P2P networking (control, data, discovery, tunnel)
+│   │   └── plugin/   # Plugin system (runtime, registry, loader)
 │   ├── chain/        # Blockchain integration
+│   │   ├── contracts/# Smart contracts
+│   │   └── payment/  # e-CNY integration
 │   └── plugins/      # Built-in plugins (gpu-share, storage, proxy)
 ├── pkg/              # Public utilities (crypto, log, utils)
 ├── configs/          # Configuration files
@@ -136,7 +180,7 @@ blockchain:
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE_MINDMAP.md)
+- [Architecture Mind Map](docs/ARCHITECTURE_MINDMAP.md)
 - [Plugin Development Guide](docs/REFACTOR_PLAN_v2.md)
 
 ## License

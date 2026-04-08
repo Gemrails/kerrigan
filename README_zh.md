@@ -36,6 +36,57 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## 核心概念
+
+### 核心价值
+- **去中心化**: 无单一控制点，资源分布全球
+- **可议价**: 资源价格由市场供需动态调节
+- **可信**: 智能合约保障透明交易
+- **可扩展**: 插件化架构支持任意资源类型
+
+### 节点角色
+| 角色 | 描述 |
+|------|------|
+| **Provider** | 贡献闲置计算资源 |
+| **Consumer** | 使用网络资源 |
+| **Relay** | 转发流量实现 NAT 穿透 |
+| **Validator** | 验证链上交易 |
+
+### P2P 网络
+- **控制平面**: 节点发现、协议协商、心跳保活 (端口 38888)
+- **数据平面**: 隧道传输、负载均衡、流量加密 (端口 38889)
+- **NAT 穿透**: 直连、打洞、中继Fallback
+
+## 插件
+
+### 🎮 GPU 插件
+用于 AI 工作负载的分布式 GPU 计算：
+- LLM 推理（文本生成）
+- 图像生成（Stable Diffusion）
+- Embedding 向量
+- 模型微调（LoRA）
+- 批量推理
+
+**定价**: 基于 GPU 型号（RTX 4090/A100/H100）、显存档位和时长
+
+### 📦 存储插件
+基于 IPFS 的分布式存储：
+- 文件上传与 CID 检索
+- Pinning 持久化
+- P2P 文件分发
+- 多副本冗余
+
+**定价**: 基于 GB/月存储量和副本数
+
+### 🌐 代理插件
+网络带宽共享：
+- HTTP/HTTPS 透明代理
+- SOCKS5 通用代理
+- TUN/TAP 全局代理
+- 地理定价（CN/US/JP/SG/EU/HK）
+
+**定价**: 基于地区、带宽档位和流量
+
 ## 核心特性
 
 - **P2P 网络**: 基于 libp2p 的分布式点对点架构
@@ -84,17 +135,6 @@ make build
 ./build/kerrigan-cli resource list
 ```
 
-## 插件
-
-### GPU 插件
-用于 AI 推理、模型微调和批处理的分布式 GPU 计算。
-
-### 存储插件
-基于 IPFS 的分布式存储，支持 P2P 文件检索。
-
-### 代理插件
-支持地理定价的网络带宽共享。
-
 ## 项目结构
 
 ```
@@ -102,7 +142,11 @@ kerrigan/
 ├── cmd/               # 入口程序 (node, cli)
 ├── internal/          # 内部包
 │   ├── core/         # 核心模块 (网络, 插件, 资源)
+│   │   ├── network/  # P2P 网络 (control, data, discovery, tunnel)
+│   │   └── plugin/   # 插件系统 (runtime, registry, loader)
 │   ├── chain/        # 区块链集成
+│   │   ├── contracts/# 智能合约
+│   │   └── payment/  # e-CNY 集成
 │   └── plugins/      # 内置插件 (gpu-share, storage, proxy)
 ├── pkg/              # 公共工具 (crypto, log, utils)
 ├── configs/          # 配置文件
@@ -136,7 +180,7 @@ blockchain:
 
 ## 文档
 
-- [架构设计](docs/ARCHITECTURE_MINDMAP.md)
+- [架构脑图](docs/ARCHITECTURE_MINDMAP.md)
 - [插件开发指南](docs/REFACTOR_PLAN_v2.md)
 
 ## 许可证
