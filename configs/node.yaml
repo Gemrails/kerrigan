@@ -1,0 +1,170 @@
+# Kerrigan v2 Configuration
+
+# Node Configuration
+node:
+  # Node ID (auto-generated if empty)
+  node_id: ""
+  
+  # Node roles
+  roles:
+    - provider
+    # - consumer
+    # - relay
+    # - validator
+  
+  # Plugins to enable
+  plugins:
+    - gpu-share
+    - storage
+    # - proxy
+  
+  # Data directory
+  data_dir: "./data"
+  
+  # Log level: debug, info, warn, error
+  log_level: "info"
+
+# Network Configuration
+network:
+  # Control plane port (for node discovery and signaling)
+  control_port: 38888
+  
+  # Data plane port (for actual data transfer)
+  data_port: 38889
+  
+  # Seed nodes for bootstrap
+  seed_nodes:
+    - "/ip4/127.0.0.1/tcp/38888/p2p/Qm genesis node"
+    # - "/ip4/1.2.3.4/tcp/38888/p2p/Qm..."
+  
+  # NAT traversal
+  nat:
+    enabled: true
+    # Hole-punching timeout (seconds)
+    punch_timeout: 30
+  
+  # Connection limits
+  max_connections: 100
+  connection_timeout: 60
+
+# Blockchain Configuration
+blockchain:
+  # Network: mainnet, testnet, local
+  network: "local"
+  
+  # RPC endpoints
+  rpc:
+    ethereum: "http://localhost:8545"
+    # e-CNY payment gateway
+    ecny_gateway: "http://localhost:8080"
+  
+  # Contract addresses (for local development)
+  contracts:
+    resource_registry: "0x0000000000000000000000000000000000000000"
+    trading: "0x0000000000000000000000000000000000000000"
+    plugin_registry: "0x0000000000000000000000000000000000000000"
+    payment: "0x0000000000000000000000000000000000000000"
+  
+  # Gas settings
+  gas:
+    max_gas: 5000000
+    gas_price_gwei: 30
+
+# Plugin Configuration
+plugins:
+  # Plugin directory
+  dir: "./plugins"
+  
+  # Plugin repository (IPFS CID for plugin registry)
+  repository: ""
+  
+  # Auto-update plugins
+  auto_update: false
+
+# Resource Configuration
+resource:
+  # GPU settings
+  gpu:
+    enabled: true
+    # Max memory usage per task (MB)
+    max_memory_mb: 8192
+    # Compute capability
+    compute_capability: "8.6"
+  
+  # Storage settings
+  storage:
+    enabled: true
+    # Max storage to share (GB)
+    max_storage_gb: 100
+    # Pin locally by default
+    auto_pin: true
+  
+  # Proxy settings
+  proxy:
+    enabled: false
+    # Bandwidth limit (Mbps)
+    max_bandwidth_mbps: 100
+    # Allowed proxy regions
+    allowed_regions:
+      - CN
+      - HK
+      - US
+
+# API Configuration
+api:
+  # gRPC API
+  grpc:
+    enabled: true
+    port: 48899
+  
+  # HTTP API (for admin/debug)
+  http:
+    enabled: true
+    port: 48898
+    # CORS enabled
+    cors: false
+
+# Metering & Billing
+metering:
+  # Collection interval (seconds)
+  collection_interval: 60
+  
+  # Billing cycle (hours)
+  billing_cycle: 24
+  
+  # Price configuration
+  pricing:
+    # GPU price per second (e-CNY)
+    gpu_per_second: 0.001
+    # Storage price per GB per month (e-CNY)
+    storage_per_gb_month: 0.01
+    # Bandwidth price per MB (e-CNY)
+    bandwidth_per_mb: 0.0001
+
+# Security
+security:
+  # TLS enabled
+  tls_enabled: false
+  # TLS certificates
+  cert_file: ""
+  key_file: ""
+  
+  # Plugin verification
+  verify_signatures: true
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+
+# Monitoring
+monitoring:
+  # Metrics endpoint
+  prometheus:
+    enabled: false
+    port: 9090
+  
+  # Health check endpoint
+  health:
+    enabled: true
+    port: 8080

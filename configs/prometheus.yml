@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'kerrigan-node'
+    static_configs:
+      - targets: ['kerrigan-node:38888']
+        labels:
+          service: 'kerrigan-node'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'ethereum'
+    static_configs:
+      - targets: ['ethereum:8545']
+        labels:
+          service: 'ethereum'
+
+  - job_name: 'ipfs'
+    static_configs:
+      - targets: ['ipfs:5001']
+        labels:
+          service: 'ipfs'
