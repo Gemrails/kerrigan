@@ -1,0 +1,137 @@
+version: "3.8"
+
+services:
+  kerrigan-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kerrigan/node:dev
+    container_name: kerrigan-node
+    ports:
+      - "38888:38888"
+      - "38889:38889"
+    environment:
+      - NODE_ROLES=provider,consumer
+      - NETWORK_CONTROL_PORT=38888
+      - NETWORK_DATA_PORT=38889
+      - BLOCKCHAIN_NETWORK=local
+      - BLOCKCHAIN_RPC_URL=http://ethereum:8545
+      - IPFS_API_URL=http://ipfs:5001
+      - LOG_LEVEL=info
+    volumes:
+      - kerrigan-data:/app/data
+      - kerrigan-config:/app/config
+    depends_on:
+      - ethereum
+      - ipfs
+    networks:
+      - kerrigan-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:38888/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kerrigan-cli:
+    image: kerrigan/node:dev
+    container_name: kerrigan-cli
+    profiles:
+      - tools
+    command: ["node", "status"]
+    depends_on:
+      - kerrigan-node
+    networks:
+      - kerrigan-network
+
+  ethereum:
+    image: docker.io/library/ethereum/client-go:v1.12.0
+    container_name: ethereum
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+    command: |
+      --dev
+      --http
+      --http.vhosts="*"
+      --http.addr="0.0.0.0"
+      --http.api="eth,net,web3,debug,txpool"
+      --ws
+      --ws.addr="0.0.0.0"
+      --ws.api="eth,net,web3"
+      --miner.threads=1
+      --networkid=1337
+    volumes:
+      - ethereum-data:/data
+    networks:
+      - kerrigan-network
+    restart: unless-stopped
+
+  ipfs:
+    image: docker.io/library/ipfs/kubo:v0.24.0
+    container_name: ipfs
+    ports:
+      - "5001:5001"
+      - "8080:8080"
+      - "4001:4001"
+    environment:
+      - IPFS_LOGGING=info
+    volumes:
+      - ipfs-data:/data/ipfs
+    networks:
+      - kerrigan-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5001/api/v0/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prometheus:
+    image: docker.io/library/prometheus:v2.48.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    networks:
+      - kerrigan-network
+    restart: unless-stopped
+
+  grafana:
+    image: docker.io/library/grafana/grafana:10.2.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - kerrigan-network
+    restart: unless-stopped
+
+volumes:
+  kerrigan-data:
+  kerrigan-config:
+  ethereum-data:
+  ipfs-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  kerrigan-network:
+    driver: bridge
