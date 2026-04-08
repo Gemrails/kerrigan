@@ -1,4 +1,6 @@
-# 🦌 Kerrigan
+# 👑 Kerrigan
+
+English | [中文](./README_zh.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white)](./go.mod)
@@ -22,14 +24,14 @@ A decentralized resource trading platform built on P2P network and blockchain te
 │                    Application Layer                         │
 │    GPU Plugin  │  Storage Plugin  │  Proxy Plugin         │
 ├─────────────────────────────────────────────────────────────┤
-│                    Plugin Runtime                            │
-│    Lifecycle  │  Resource Abstraction  │  Metering         │
+│                    Plugin Runtime                           │
+│    Lifecycle  │  Resource Abstraction  │  Metering          │
 ├─────────────────────────────────────────────────────────────┤
-│                    P2P Network Layer                         │
-│    Control Plane  │  Data Plane                             │
+│                    P2P Network Layer                       │
+│    Control Plane  │  Data Plane                              │
 ├─────────────────────────────────────────────────────────────┤
 │                    Blockchain Layer                          │
-│    Resource Registry  │  Trading  │  Plugin Registry         │
+│    Resource Registry  │  Trading  │  Plugin Registry        │
 │                    e-CNY Payment                            │
 └─────────────────────────────────────────────────────────────┘
 ```
