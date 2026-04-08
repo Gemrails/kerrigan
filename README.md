@@ -17,24 +17,40 @@ A decentralized resource trading platform built on P2P network and blockchain te
 
 ![Client Demo](media/kerrigan前端效果.gif)
 
-## System Architecture
+## System Architecture (Compliant Dual-Chain Design)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Application Layer                         │
-│    GPU Plugin  │  Storage Plugin  │  Proxy Plugin      │
-├─────────────────────────────────────────────────────────────┤
-│                    Plugin Runtime                            │
-│    Lifecycle  │  Resource Abstraction  │  Metering         │
-├─────────────────────────────────────────────────────────────┤
-│                    P2P Network Layer                        │
-│    Control Plane  │  Data Plane                             │
-├─────────────────────────────────────────────────────────────┤
-│                    Blockchain Layer                         │
-│    Resource Registry  │  Trading  │  Plugin Registry         │
-│                    e-CNY Payment                            │
-└─────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                       Application Layer                            │
+│    GPU Plugin  │  Storage Plugin  │  Proxy Plugin                │
+├───────────────────────────────────────────────────────────────────┤
+│                       Plugin Runtime                               │
+│    Lifecycle  │  Resource Abstraction  │  Metering                │
+├───────────────────────────────────────────────────────────────────┤
+│                       P2P Network Layer                            │
+│    Control Plane  │  Data Plane                                  │
+├───────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│   ┌───────────────────────────┐  ┌───────────────────────────┐    │
+│   │   Business Chain         │  │   Settlement Layer        │    │
+│   │   (Federated Chain)      │  │   (e-CNY 2.0)             │    │
+│   ├───────────────────────────┤  ├───────────────────────────┤    │
+│   │ • Resource Registry      │  │ • Escrow &托管           │    │
+│   │ • Task Distribution      │  │ • e-CNY Payments          │    │
+│   │ • Service Attestation    │  │ • Settlement &对账        │    │
+│   │ • Dispute Arbitration    │  │ • Compliance Audit        │    │
+│   └───────────────────────────┘  └───────────────────────────┘    │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+
+⚖️ Compliant Design: No Token/ICO • e-CNY Only • Licensed Bank Integration
 ```
+
+### Compliance Features
+- **No Token Issuance**: Pure resource trading, no virtual currency
+- **e-CNY 2.0 Native**: Bank deposit-based digital RMB (launched 2026)
+- **Licensed Integration**: Via licensed banks/institutions
+- **KYC/AML Compliant**: Full identity verification
 
 ## Key Concepts
 
