@@ -198,6 +198,7 @@ blockchain:
 ## 文档
 
 - [架构脑图](docs/ARCHITECTURE_MINDMAP.md)
+- [通信架构](docs/COMMUNICATION.md)
 - [插件开发指南](docs/REFACTOR_PLAN_v2.md)
 
 ## 许可证

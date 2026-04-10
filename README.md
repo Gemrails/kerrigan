@@ -197,6 +197,7 @@ blockchain:
 ## Documentation
 
 - [Architecture Mind Map](docs/ARCHITECTURE_MINDMAP.md)
+- [Communication Architecture](docs/COMMUNICATION.md)
 - [Plugin Development Guide](docs/REFACTOR_PLAN_v2.md)
 
 ## License
