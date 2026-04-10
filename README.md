@@ -22,7 +22,8 @@ A decentralized resource trading platform built on P2P network and blockchain te
 ```
 ┌───────────────────────────────────────────────────────────────────┐
 │                       Application Layer                            │
-│    GPU Plugin  │  Storage Plugin  │  Proxy Plugin                │
+│  Agent Plugin  │  GPU Plugin  │  Storage Plugin  │  Proxy Plugin │
+│  (Featured)                                            │            │
 ├───────────────────────────────────────────────────────────────────┤
 │                       Plugin Runtime                               │
 │    Lifecycle  │  Resource Abstraction  │  Metering                │
@@ -73,6 +74,47 @@ A decentralized resource trading platform built on P2P network and blockchain te
 - **Data Plane**: Tunnel transmission, load balancing, traffic encryption (port 38889)
 - **NAT Traversal**: Direct connection, hole punching, relay fallback
 
+## ⭐ Featured Plugin: Agent Task Dispatch
+
+**The most powerful feature**: Dispatch AI agent tasks to remote nodes running OpenClaw or DeerFlow frameworks. Unlike traditional GPU plugins that require direct hardware access, the Agent plugin enables task distribution across a P2P network of AI agents.
+
+### 🤖 Agent Plugin
+
+Distributed AI task execution via OpenClaw/DeerFlow integration:
+
+```
+┌─────────┐    Task Request    ┌─────────┐    Dispatch    ┌─────────┐
+│Consumer │ ──────────────────► │  Node   │ ────────────► │OpenClaw │
+│         │                    │ (Local) │               │ Node    │
+└─────────┘                    └─────────┘               └─────────┘
+                                                        or
+                                                      ┌─────────┐
+                                                      │DeerFlow │
+                                                      │ Node    │
+                                                      └─────────┘
+```
+
+**Supported Frameworks:**
+
+| Framework | Protocol | Capabilities | Use Case |
+|-----------|----------|--------------|----------|
+| **OpenClaw** | WebSocket (port 18789) | Task queue, Multi-channel AI assistant, Sub-agent orchestration | Automation, Chat, Long-running tasks |
+| **DeerFlow** | HTTP API (port 8000) | Deep research, LangGraph orchestration, Code execution, Multi-step workflows | Research, Complex coding, Multi-agent collaboration |
+
+**Task Types:**
+- `research` - Deep research with web search and source synthesis
+- `code` - Code generation, debugging, and execution
+- `general` - Multi-turn conversation and task automation
+
+**Architecture:**
+- **Agent Registry**: Tracks available agent nodes by capabilities (web_search, code_execution, deep_research)
+- **Task Dispatcher**: Worker pool with concurrent task execution and timeout control
+- **Protocol Adapters**: Pluggable adapters for different agent frameworks
+
+**Pricing**: Based on task complexity, execution time, and required capabilities
+
+---
+
 ## Plugins
 
 ### 🎮 GPU Plugin
@@ -105,8 +147,9 @@ Network bandwidth sharing:
 
 ## Features
 
+- **Agent Task Dispatch**: Native support for OpenClaw/DeerFlow frameworks - dispatch AI tasks across the P2P network
 - **P2P Network**: Distributed peer-to-peer architecture with libp2p
-- **Plugin System**: Extensible plugin architecture for GPU, Storage, and Proxy resources
+- **Plugin System**: Extensible plugin architecture for Agent, GPU, Storage, and Proxy resources
 - **Blockchain Integration**: Smart contracts for resource registration and trading
 - **e-CNY Payments**: Integrated payment system with escrow protection
 
