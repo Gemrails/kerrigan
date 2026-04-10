@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white)](./go.mod)
 
-**Kerrigan** - 可议价的去中心化任务分发网络
+**Kerrigan** - AI 推理任务分发网络
 
 基于 P2P 网络和区块链技术构建的去中心化资源交易平台。通过智能合约和数字人民币（e-CNY）支付，实现计算资源（GPU/存储/带宽/Agent）的共享与透明定价。
 

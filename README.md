@@ -5,7 +5,7 @@ English | [中文](./README_zh.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white)](./go.mod)
 
-**Kerrigan** - A Negotiable Decentralized Task Distribution Network
+**Kerrigan** - AI Inference Task Distribution Network
 
 A decentralized resource trading platform built on P2P network and blockchain technology. It enables sharing of compute resources (GPU/Storage/Bandwidth/Agent) with transparent pricing via smart contracts and e-CNY payments.
 
