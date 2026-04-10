@@ -259,6 +259,53 @@
 
 ---
 
+## 六、核心插件 (续)
+
+### 6.4 Agent 算力插件 (agent)
+
+```
+🔌 Agent Plugin
+│
+├── 🎯 插件定位
+│   ├── 任务分发到远程 Agent 节点
+│   ├── 支持 OpenClaw / DeerFlow 等框架
+│   └── 原有 GPU 插件保留，新增 Agent 插件
+│
+├── 🏗️ 架构设计
+│   ├── AgentRegistry - 节点注册表
+│   ├── TaskDispatcher - 任务分发器
+│   ├── OpenClawAdapter - OpenClaw 适配器
+│   └── DeerFlowAdapter - DeerFlow 适配器
+│
+├── 🔧 OpenClaw 集成
+│   ├── WebSocket Gateway (port 18789)
+│   ├── 任务队列 + Dispatcher 模式
+│   ├── 多渠道 AI 助手能力
+│   └── 适用场景: 助手、聊天、自动化任务
+│
+├── 🦌 DeerFlow 集成
+│   ├── HTTP API (port 8000)
+│   ├── LangGraph 编排
+│   ├── 子 Agent 协同
+│   └── 适用场景: 深度研究、代码生成
+│
+├── 📋 任务类型
+│   ├── research - 深度研究任务
+│   ├── code - 代码生成任务
+│   ├── general - 通用对话任务
+│   └── multi-step - 多步骤复合任务
+│
+└── 🔄 任务流程
+    ├── 1. Consumer 提交任务
+    ├── 2. Dispatcher 查询 Registry
+    ├── 3. 匹配最佳 Agent 节点
+    ├── 4. 任务下发到远程节点
+    ├── 5. 异步等待结果
+    └── 6. 返回结果给 Consumer
+```
+
+---
+
 ## 六、数字人民币支付
 
 ```
