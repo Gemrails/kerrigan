@@ -104,7 +104,7 @@ func runNode(c *cli.Context) error {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	// Load configuration
-	configPath := c.String("config")
+	_ = c.String("config") // config path for future use
 	dataDir := c.String("data-dir")
 	if dataDir == "" {
 		dataDir = utils.GetDataDir("")
