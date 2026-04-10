@@ -7,7 +7,9 @@ English | [中文](./README_zh.md)
 
 **Kerrigan** - A Negotiable Decentralized Task Distribution Network
 
-A decentralized resource trading platform built on P2P network and blockchain technology. It enables sharing of compute resources (GPU/Storage/Bandwidth) with transparent pricing via smart contracts and e-CNY payments.
+A decentralized resource trading platform built on P2P network and blockchain technology. It enables sharing of compute resources (GPU/Storage/Bandwidth/Agent) with transparent pricing via smart contracts and e-CNY payments.
+
+**Core Innovation**: Native AI Agent task dispatch - tasks are automatically routed to optimal remote nodes running OpenClaw or DeerFlow frameworks, enabling distributed AI inference without direct hardware access.
 
 ## Communication Structure
 
