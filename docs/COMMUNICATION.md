@@ -3,9 +3,10 @@
 ## 目录
 
 1. [插件与节点通信模式](#1-插件与节点通信模式)
-2. [代理插件网络通信](#2-代理插件网络通信)
-3. [P2P 网络设计](#3-p2p-网络设计)
-4. [数据流示例](#4-数据流示例)
+2. [Agent 插件任务分发](#2-agent-插件任务分发)
+3. [代理插件网络通信](#3-代理插件网络通信)
+4. [P2P 网络设计](#4-p2p-网络设计)
+5. [数据流示例](#5-数据流示例)
 
 ---
 
@@ -133,7 +134,206 @@ func (p *GPUPlugin) ExecuteTask(ctx context.Context, task *plugins.Task) (*plugi
 
 ---
 
-## 2. 代理插件网络通信
+## 2. Agent 插件任务分发
+
+Agent 插件是 Kerrigan 的核心特性，支持将 AI 任务分发到运行 OpenClaw 或 DeerFlow 框架的远程节点。
+
+### 2.1 Agent 插件架构
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Agent Plugin (Agent 插件)                              │
+│                                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │   Registry   │  │  Dispatcher  │  │  OpenClaw    │  │   DeerFlow   │   │
+│  │              │  │              │  │  Adapter     │  │   Adapter    │   │
+│  │ • 节点注册   │  │ • 任务队列   │  │              │  │              │   │
+│  │ • 能力匹配   │  │ • Worker池   │  │ • WebSocket  │  │ • HTTP API   │   │
+│  │ • 心跳检测   │  │ • 结果回调   │  │ • Task Queue │  │ • LangGraph  │   │
+│  │ • 负载均衡   │  │ • 超时控制   │  │ • Port 18789 │  │ • Port 8000  │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 任务分发流程
+
+```
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│Consumer │    │  Node   │    │ Agent   │    │Registry │    │ Remote  │
+│  客户端 │    │ (本地)  │    │ Plugin  │    │  注册表  │    │ Agent   │
+└────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘
+     │               │               │               │               │
+     │ 1. 提交任务  │               │               │               │
+     │──────────────►│               │               │               │
+     │               │ 2. 能力匹配  │               │               │
+     │               │──────────────►│──────────────►│               │
+     │               │               │               │               │
+     │               │ 3. 返回最优节点│◄──────────────│               │
+     │               │◄──────────────│               │               │
+     │               │               │               │               │
+     │               │ 4. 分发任务  │               │               │
+     │               │──────────────►│──────────────►│               │
+     │               │               │               │               │
+     │               │               │               │ 5. 执行任务  │
+     │               │               │               │───────────────►│
+     │               │               │               │               │
+     │               │               │ 6. 异步结果  │◄──────────────│
+     │               │◄──────────────│◄──────────────│               │
+     │               │               │               │               │
+     │ 7. 返回结果  │               │               │               │
+     │◄──────────────│               │               │               │
+```
+
+### 2.3 核心组件
+
+#### AgentNode 节点定义
+
+```go
+// 文件: internal/plugins/agent/registry.go
+
+type AgentNode struct {
+    NodeID        string                 // 节点 ID
+    AgentType     AgentType            // "openclaw" 或 "deerflow"
+    Endpoint      string                 // WebSocket 或 HTTP URL
+    Capabilities  []AgentCapability     // 节点能力
+    Status        AgentStatus           // online/busy/offline
+    LastHeartbeat time.Time             // 最后心跳时间
+    Load          float64               // 负载 0-1
+}
+
+// Agent 框架类型
+type AgentType string
+const (
+    AgentTypeOpenClaw AgentType = "openclaw"
+    AgentTypeDeerFlow AgentType = "deerflow"
+)
+
+// 节点能力
+type AgentCapability string
+const (
+    CapWebSearch    AgentCapability = "web_search"
+    CapCodeExec     AgentCapability = "code_execution"
+    CapDeepResearch AgentCapability = "deep_research"
+    CapImageGen     AgentCapability = "image_generation"
+    CapSubAgent     AgentCapability = "sub_agent_orchestration"
+)
+```
+
+#### Registry 注册表
+
+```go
+// 文件: internal/plugins/agent/registry.go
+
+type Registry struct {
+    mu    sync.RWMutex
+    nodes map[string]*AgentNode
+}
+
+// 按能力查找节点
+func (r *Registry) GetNodesByCapability(cap AgentCapability) []*AgentNode {
+    // 返回具有特定能力的节点列表
+}
+
+// 按类型查找节点
+func (r *Registry) GetNodesByType(agentType AgentType) []*AgentNode {
+    // 返回特定框架类型的节点
+}
+```
+
+#### Dispatcher 任务分发器
+
+```go
+// 文件: internal/plugins/agent/dispatcher.go
+
+type Dispatcher struct {
+    config   Config
+    registry *Registry
+    taskQueue chan *TaskRequest
+    activeTasks map[string]*activeTask
+}
+
+// 任务请求
+type TaskRequest struct {
+    ID           string
+    Type         string                 // "research", "code", "general"
+    Prompt       string
+    Capabilities []AgentCapability      // 所需能力
+    Timeout      time.Duration
+}
+
+// 任务分发
+func (d *Dispatcher) Dispatch(ctx context.Context, req *TaskRequest) (*TaskResult, error) {
+    // 1. 选择最优节点
+    // 2. 根据节点类型选择适配器
+    // 3. 执行任务并返回结果
+}
+```
+
+### 2.4 OpenClaw 适配器
+
+OpenClaw 使用 WebSocket Gateway 协议 (端口 18789)：
+
+```go
+// 文件: internal/plugins/agent/openclaw.go
+
+type OpenClawAdapter struct {
+    endpoint string  // ws://host:18789
+    conn    *websocket.Conn
+}
+
+// 任务请求
+type OpenClawTaskRequest struct {
+    TaskID   string `json:"task_id"`
+    Prompt   string `json:"prompt"`
+    Thinking string `json:"thinking,omitempty"` // "low", "medium", "high"
+    Model    string `json:"model,omitempty"`
+}
+
+// WebSocket 消息格式
+type OpenClawMessage struct {
+    Type    string          `json:"type"` // "task", "status", "ping"
+    Content json.RawMessage `json:"content,omitempty"`
+}
+```
+
+### 2.5 DeerFlow 适配器
+
+DeerFlow 使用 HTTP REST API (端口 8000)：
+
+```go
+// 文件: internal/plugins/agent/deerflow.go
+
+type DeerFlowAdapter struct {
+    baseURL string  // http://host:8000
+    client  *http.Client
+}
+
+// 任务请求
+type DeerFlowRequest struct {
+    Query    string                 `json:"query"`
+    TaskType string               `json:"task_type,omitempty"` // "research", "code"
+    Options  map[string]interface{} `json:"options,omitempty"`
+}
+
+// API 端点
+// POST /api/v1/tasks     - 创建任务
+// GET  /api/v1/tasks/:id - 查询状态
+// DELETE /api/v1/tasks/:id - 取消任务
+```
+
+### 2.6 支持的任务类型
+
+| 任务类型 | 描述 | OpenClaw | DeerFlow |
+|---------|------|----------|----------|
+| `research` | 深度研究，自动网页搜索和源综合 | ✅ | ✅ |
+| `code` | 代码生成、调试和执行 | ✅ | ✅ |
+| `general` | 多轮对话和任务自动化 | ✅ | ✅ |
+| `image-generation` | AI 图像生成 | ✅ | ✅ |
+| `multi-step` | 多步骤复合任务 | ✅ (SubAgent) | ✅ (LangGraph) |
+
+---
+
+## 3. 代理插件网络通信
 
 Proxy 插件包含独立的网络服务组件，支持多种协议和加密方式。
 
@@ -218,7 +418,7 @@ func deriveKey(secret string) []byte {
 
 ---
 
-## 3. P2P 网络设计
+## 4. P2P 网络设计
 
 ### 3.1 双层网络架构
 
@@ -286,7 +486,7 @@ func deriveKey(secret string) []byte {
 
 ---
 
-## 4. 数据流示例
+## 5. 数据流示例
 
 ### 4.1 GPU 推理任务流程
 
@@ -348,10 +548,54 @@ func deriveKey(secret string) []byte {
      │               │               │ 6. 目标响应   │
      │               │◄═══════════════════════════════│
      │               │               │               │
-     │ 7. 加密返回   │               │               │
+      │ 7. 加密返回   │               │               │
      │◄═══════════════════════════════│               │
      │               │               │               │
 ```
+
+### 5.3 Agent 任务分发流程
+
+```
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│Consumer │    │  Node   │    │ Agent   │    │Registry │    │ Remote  │
+│         │    │         │    │ Plugin  │    │         │    │ Agent   │
+│ Client  │    │         │    │         │    │         │    │ Node    │
+└────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘
+     │               │               │               │               │
+     │ 1. Submit     │               │               │               │
+     │    Task       │               │               │               │
+     │──────────────►│               │               │               │
+     │               │               │               │               │
+     │               │ 2. Capability │               │               │
+     │               │    Matching   │               │               │
+     │               │──────────────►│──────────────►│               │
+     │               │               │               │               │
+     │               │ 3. Best Node │◄──────────────│               │
+     │               │◄──────────────│               │               │
+     │               │               │               │               │
+     │               │ 4. Dispatch   │               │               │
+     │               │──────────────►│──────────────►│               │
+     │               │               │               │               │
+     │               │               │               │ 5. Execute   │
+     │               │               │               │───────────────►│
+     │               │               │               │               │
+     │               │               │ 6. Async      │◄──────────────│
+     │               │◄──────────────│◄──────────────│               │
+     │               │               │               │               │
+     │ 7. Result     │               │               │               │
+     │◄──────────────│               │               │               │
+```
+
+**OpenClaw vs DeerFlow 对比:**
+
+| 特性 | OpenClaw | DeerFlow |
+|------|----------|----------|
+| **协议** | WebSocket | HTTP REST |
+| **端口** | 18789 | 8000 |
+| **任务队列** | ✅ 内置 | ❌ 轮询 |
+| **LangGraph** | ❌ | ✅ |
+| **子 Agent** | ✅ | ✅ |
+| **适用场景** | 自动化、聊天 | 深度研究、代码生成 |
 
 ---
 
@@ -363,6 +607,11 @@ func deriveKey(secret string) []byte {
 |------|------|
 | `internal/plugins/plugins.go` | 插件接口定义 |
 | `internal/plugins/gpu-share/plugin.go` | GPU 插件实现 |
+| `internal/plugins/agent/plugin.go` | Agent 插件主实现 |
+| `internal/plugins/agent/registry.go` | Agent 节点注册表 |
+| `internal/plugins/agent/dispatcher.go` | Agent 任务分发器 |
+| `internal/plugins/agent/openclaw.go` | OpenClaw 适配器 |
+| `internal/plugins/agent/deerflow.go` | DeerFlow 适配器 |
 | `internal/plugins/proxy/plugin.go` | 代理插件实现 |
 | `internal/plugins/proxy/tunnel/tunnel.go` | 隧道服务实现 |
 | `internal/core/plugin/interface.go` | 核心插件接口 |
@@ -374,6 +623,9 @@ func deriveKey(secret string) []byte {
 | 1080 | HTTP 代理 |
 | 1081 | SOCKS5 代理 |
 | 1082 | 隧道服务 |
+| 18789 | OpenClaw WebSocket Gateway |
+| 8000 | DeerFlow HTTP API |
+| 3000 | DeerFlow Web UI |
 | 38888 | P2P 控制平面 |
 | 38889 | P2P 数据平面 |
 
